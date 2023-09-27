@@ -5,6 +5,7 @@ const technology = require("./technology");
 const activityLog = require("./activityLog");
 const notification = require("./notification");
 const comment = require("./comment");
+const location = require("./location");
 module.exports = {
   user,
   blog,
@@ -13,4 +14,5 @@ module.exports = {
   activityLog,
   notification,
   comment,
+  location,
 };

@@ -5,51 +5,44 @@ const jwt = require("jsonwebtoken");
 const Types = require("mongoose").Types;
 const activityLog = require("../helpers/activityLog");
 
-exports.register = async (req, res) => {
-
-  let user = await userModel.findOne({
-    email: req.body.email,
-    isDeleted: false,
-  });
-  if (user) {
-    res.status(STATUS_ALREADY_EXISTS).send(
-      errorResponse(STATUS_ALREADY_EXISTS, {
-        message: "email id already exists",
-      })
-    );
-    return;
-  }
-  let defaultPass = "123456";
-  let payload = {
-    ...req.body,
-  };
-  if (req.file && req.file.filename) {
-    Object.assign(payload, { profileImage: req.file.filename });
-  }
-  // if (req.body.password) {
-  let hashedPass = await hashPassword(req.body.password || defaultPass);
-  Object.assign(payload, { hashedPassword: hashedPass });
-  // }
- 
+exports.createLocation = async (req, res) => {
+  let payload = req.body;
+  let locationRecord = {};
   try {
-    let userRecord = await userModel.create(payload);
-    let tokenData = await generateToken(
-      userRecord._id,
-      req.body.name,
-      "User",
-      req.body.email,
-      req.body.profileImage
+    let userChecked = await locationModel.findOne({
+      UserId: req.currentUser.id,
+    });
+    if (!userChecked) {
+      if (payload) {
+        Object.assign(payload, {
+          UserId: Types.ObjectId(req?.currentUser?.id),
+        });
+      }
+      locationRecord = await locationModel.create(payload);
+      if (locationRecord)
+        Object.assign(payload, {
+          locationId: Types.ObjectId(locationRecord._id),
+        });
+      
+        await userModel.updateOne( { _id: req.currentUser.id},payload)
+        res.status(STATUS_OK).send(
+          successResponse(STATUS_OK, locationRecord, {
+            message: "location registered successfull",
+          })
+        );
+    }
+    let updated = await locationModel.updateOne(
+      { _id: userChecked._id.toString() },
+      payload
     );
-    if (userRecord)
+    if (updated)
       res.status(STATUS_OK).send(
-        successResponse(STATUS_OK, userRecord,tokenData, {
-          message: "registered successfull",
+        successResponse(STATUS_OK, payload, {
+          message: "location updated successfull",
         })
       );
-      
-    req.userId = req?.currentUser?._id || userRecord._id;
-    await activityLog.create(req, userRecord, "inserted");
-   
+    req.userId = req?.currentUser?.id || locationRecord._id;
+    await activityLog.create(req, payload, "inserted");
   } catch (error) {
     console.log(error);
     logger.error(errorBody(req.method, req.originalUrl, error.message));
@@ -125,7 +118,6 @@ exports.signIn = async (req, res) => {
 
   try {
     let token = await generateToken(
-      user._id,
       user.name,
       user.role.name,
       user.email,

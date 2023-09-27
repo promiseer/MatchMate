@@ -6,4 +6,5 @@ module.exports = (app) => {
   app.use("/activity", require("./activitylogs"));
   app.use("/notification", require("./notification"));
   app.use("/comment", require("./comment"));
+  app.use("/location", require("./location"));
 };

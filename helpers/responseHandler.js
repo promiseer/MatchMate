@@ -1,6 +1,7 @@
-global.successResponse = (statusCode, data, message) => {
+global.successResponse = (statusCode, data,token, message) => {
   return {
     data: data,
+    token: token,
     isError: false,
     message: message ? message : "",
     status: statusCode ? statusCode : 200,

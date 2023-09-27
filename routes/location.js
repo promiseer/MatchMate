@@ -4,12 +4,10 @@ const controller = require("../controller");
 const validationSchema = require("../validation/index");
 const middleware = require("../middleware/index");
 router.post(
-  "/createUser",
-  middleware.fileUpload.single("profileImage"),
-  middleware.joiValidation(validationSchema.user.register),
-  // middleware.isAuth,
-  // middleware.isAdmin,
-  controller.user.register
+  "/createLocation",
+  middleware.joiValidation(validationSchema.location.createLocation),
+  middleware.isAuth,
+  controller.location.createLocation
 );
 router.post(
   "/signin",

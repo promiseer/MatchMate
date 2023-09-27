@@ -6,6 +6,7 @@ const isAuth = (req, res, next) => {
     if (!decoded) {
       res.status(401).send("token not found or expired!!");
     }
+    console.log(decoded,'jwt')
     req.currentUser = decoded;
     next();
   } else {
